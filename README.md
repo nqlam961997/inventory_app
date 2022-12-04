@@ -10,8 +10,8 @@ docker start {redis-container-name}
 ```
 Access to redis server container: 
 ```
-- docker exec -it {container-id} sh
-- redis-cli
+docker exec -it {container-id} sh
+redis-cli
 ```
 
 ## Getting started
