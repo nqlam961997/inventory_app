@@ -4,6 +4,8 @@ import com.group.inventory.common.exception.InventoryBusinessException;
 import com.group.inventory.common.service.GenericService;
 import com.group.inventory.common.util.BaseMapper;
 import com.group.inventory.department.service.DepartmentService;
+import com.group.inventory.notification.dto.MessageDTO;
+import com.group.inventory.notification.service.EmailService;
 import com.group.inventory.role.dto.RoleDTO;
 import com.group.inventory.role.model.ERole;
 import com.group.inventory.role.model.Role;
@@ -75,6 +77,8 @@ class UserServiceImpl implements UserService {
 
     private final DepartmentService departmentService;
 
+    private final EmailService emailService;
+
     //    -----------------------       CONSTRUCTOR       ----------------------
     public UserServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
@@ -82,13 +86,15 @@ class UserServiceImpl implements UserService {
                            PasswordEncoder encoder,
                            BaseMapper mapper,
                            RoleService roleService,
-                           @Lazy DepartmentService departmentService) {
+                           @Lazy DepartmentService departmentService,
+                           EmailService emailService) {
         this.userRepository = userRepository;
         this.imageService = imageService;
         this.encoder = encoder;
         this.mapper = mapper;
         this.roleService = roleService;
         this.departmentService = departmentService;
+        this.emailService = emailService;
     }
 
     //    -----------------------       METHOD       ----------------------
@@ -167,6 +173,16 @@ class UserServiceImpl implements UserService {
         Role role = roleService.findByName(ERole.ROLE_USER);
 
         savedUser.addRole(role);
+
+        // send notification
+        MessageDTO messageDTO = new MessageDTO();
+        messageDTO.setFrom("nqlamjava@gmail.com");
+        messageDTO.setTo(savedUser.getEmail());
+        messageDTO.setToName(savedUser.getUsername());
+        messageDTO.setSubject("Welcome to my world!");
+        messageDTO.setContent("Pay your bill to use your service");
+
+        emailService.sendEmail(messageDTO);
 
         return createUserWithRolesDTOResponse(savedUser, request);
     }
